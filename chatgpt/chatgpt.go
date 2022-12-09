@@ -10,12 +10,13 @@ import (
 	"net/http"
 	"os"
 	"strings"
+	"sync"
 	"time"
 	"unsafe"
 )
 
 func GetChatGptMessage(requestText string, openId string) string {
-	fmt.Println("开始调用 ChatGPT")
+	fmt.Println("向 ChatGPT 发送:", requestText)
 	chatGptMessage := DefaultGPT.SendMsg(requestText, openId)
 	chatGptMessage = strings.TrimSpace(chatGptMessage)
 	chatGptMessage = strings.Trim(chatGptMessage, "\n")
@@ -25,6 +26,7 @@ func GetChatGptMessage(requestText string, openId string) string {
 var (
 	DefaultGPT  = newChatGPT()
 	userInfoMap = make(map[string]*userInfo)
+	lock        = sync.Mutex{}
 )
 
 type ChatGPT struct {
@@ -112,6 +114,9 @@ func (c *ChatGPT) SendMsg(msg, openId string) string {
 	if !c.ok {
 		return "ChatGPT 没有初始化成功"
 	}
+
+	lock.Lock()
+	defer lock.Unlock()
 
 	info, ok := userInfoMap[openId]
 	if !ok || info.ttl.Before(time.Now()) {

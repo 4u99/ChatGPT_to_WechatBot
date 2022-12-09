@@ -75,7 +75,6 @@ func groupMessage(msg *openwechat.Message) {
 	}
 
 	// 获取 ChatGPT 消息
-	fmt.Println("向 ChatGPT 发送:", replaceMessage)
 	chatGptMessage := chatgpt.GetChatGptMessage(replaceMessage, msg.FromUserName+":"+groupSender.NickName)
 
 	// 回复消息
